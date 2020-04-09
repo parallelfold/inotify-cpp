@@ -78,9 +78,6 @@ mkdir build; cd bulid
 cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr ..
 cmake --build .
 
-# run tests
-ctest -VV
-
 # install the library
 make install
 ```
