@@ -12,7 +12,7 @@ the implementation of a simple filesystem event watcher for the commandline.
   ```c++
 #include <inotify-cpp/NotifierBuilder.h>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <iostream>
 #include <thread>
@@ -85,6 +85,12 @@ ctest -VV
 make install
 ```
 
+## Run Tests ##
+First, install `libboost-test` >= 1.54.0, then run:
+```
+ctest -VV
+```
+
 ## Build Example ##
 Build and install the library before you run the following commands:
 ```bash
@@ -99,8 +105,7 @@ cmake --build inotify_example
 
 ## Dependencies ##
  + lib
-   + boost 1.54.0
-   + c++11
+   + c++17
    + linux 2.6.13
  + build
    + cmake 3.8  
