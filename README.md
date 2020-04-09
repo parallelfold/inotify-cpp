@@ -1,5 +1,5 @@
 # Inotify-cpp #
-===========
+
 (Forked from [https://github.com/erikzenker/inotify-cpp])
 
 __Inotify-cpp__ is a C++ wrapper for linux inotify. It lets you watch for
