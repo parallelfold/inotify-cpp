@@ -11,13 +11,6 @@ set(LIB_HEADER
 cmake_minimum_required(VERSION 3.8)
 project(${LIB_NAME} VERSION 0.0.1)
 
-# dependencies
-find_package(
-        Boost 1.54.0
-        COMPONENTS system filesystem
-        REQUIRED
-)
-
 # library definition
 add_library(${LIB_NAME} SHARED ${LIB_SRCS} ${LIB_HEADER})
 
@@ -45,8 +38,4 @@ target_compile_features(${LIB_NAME} PUBLIC cxx_std_11)
 target_include_directories(${LIB_NAME} PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>)
-target_link_libraries(${LIB_NAME}
-        INTERFACE
-          Boost::system
-          Boost::filesystem)
 add_library(${LIB_COMPANY}::${LIB_NAME} ALIAS ${LIB_NAME})
