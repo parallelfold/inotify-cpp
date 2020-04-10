@@ -10,8 +10,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-namespace fs = std::filesystem;
-
 namespace inotify {
 
 Inotify::Inotify()
@@ -98,12 +96,17 @@ Inotify::~Inotify()
  */
 void Inotify::watchDirectoryRecursively(fs::path path)
 {
-    std::vector<std::filesystem::path> paths;
+    std::vector<fs::path> paths;
 
     if (fs::exists(path)) {
         if (fs::is_directory(path)) {
+#ifdef INOTIFY_CPP_USE_CXX17
             std::error_code ec;
             fs::recursive_directory_iterator it(path, fs::directory_options::follow_directory_symlink, ec);
+#else
+            boost::system::error_code ec;
+            fs::recursive_directory_iterator it(path, fs::symlink_option::recurse, ec);
+#endif
             fs::recursive_directory_iterator end;
 
             for (; it != end; it.increment(ec)) {
@@ -161,6 +164,7 @@ void Inotify::watchFile(fs::path filePath)
             throw std::runtime_error(errorStream.str());
         }
         mDirectorieMap.left.insert({wd, filePath});
+        mDirectorieMap.right.insert({filePath, wd});
     } else {
         throw std::invalid_argument(
             "Can´t watch Path! Path does not exist. Path: " + filePath.string());
@@ -329,14 +333,15 @@ void Inotify::readEventsFromBuffer(
     int i = 0;
     while (i < length) {
         inotify_event* event = ((struct inotify_event*)&buffer[i]);
+    
+        auto path = wdToPath(event->wd);
 
         if(event->mask & IN_IGNORED){
             i += EVENT_SIZE + event->len;
             mDirectorieMap.left.erase(event->wd);
+            mDirectorieMap.right.erase(path);
             continue;
         }
-
-        auto path = wdToPath(event->wd);
 
         if (fs::is_directory(path)) {
             path = path / std::string(event->name);

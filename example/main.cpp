@@ -1,6 +1,12 @@
 #include <inotify-cpp/NotifierBuilder.h>
 
+#ifdef INOTIFY_CPP_USE_CXX17
+#include <filesystem>
+namespace fs = std::filesystem;
+#else
 #include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
+#endif
 
 #include <iostream>
 #include <thread>
@@ -16,7 +22,7 @@ int main(int argc, char** argv)
     }
 
     // Parse the directory to watch
-    std::filesystem::path path(argv[1]);
+    fs::path path(argv[1]);
 
     // Set the event handler which will be used to process particular events
     auto handleNotification = [&](Notification notification) {

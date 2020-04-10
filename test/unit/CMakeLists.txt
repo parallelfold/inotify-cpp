@@ -8,14 +8,25 @@ if(NOT TARGET inotify-cpp::inotify-cpp)
     find_package(inotify-cpp CONFIG REQUIRED)
 endif()
 
-###############################################################################
-# Boost
-###############################################################################
 find_package(
         Boost 1.54.0
-        COMPONENTS unit_test_framework system
+        COMPONENTS unit_test_framework
         REQUIRED
 )
+
+if(NOT INOTIFY_CPP_USE_CXX17)
+    ###############################################################################
+    # Boost
+    ###############################################################################
+    find_package(
+            Boost 1.54.0
+            COMPONENTS system filesystem
+            REQUIRED
+    )
+    set(INOTIFY_CPP_ADDITIONAL_LIBS
+        Boost::system
+        Boost::filesystem)
+endif()
 
 ###############################################################################
 # Thread
@@ -30,6 +41,7 @@ target_link_libraries(inotify_unit_test
         PRIVATE
           inotify-cpp::inotify-cpp
           Boost::unit_test_framework
-          ${CMAKE_THREAD_LIBS_INIT})
+          ${CMAKE_THREAD_LIBS_INIT}
+          ${INOTIFY_CPP_ADDITIONAL_LIBS})
 
 add_test(NAME inotify_unit_test COMMAND inotify_unit_test)

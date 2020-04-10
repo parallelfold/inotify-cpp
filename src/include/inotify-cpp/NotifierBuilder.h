@@ -1,9 +1,17 @@
 #pragma once
 
+#include "config.h"
+
 #include <inotify-cpp/Inotify.h>
 #include <inotify-cpp/Notification.h>
 
+#ifdef INOTIFY_CPP_USE_CXX17
 #include <filesystem>
+namespace fs = std::filesystem;
+#else
+#include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
+#endif
 
 #include <memory>
 #include <string>
@@ -19,11 +27,11 @@ class NotifierBuilder {
     auto run() -> void;
     auto runOnce() -> void;
     auto stop() -> void;
-    auto watchPathRecursively(std::filesystem::path path) -> NotifierBuilder&;
-    auto watchFile(std::filesystem::path file) -> NotifierBuilder&;
-    auto unwatchFile(std::filesystem::path file) -> NotifierBuilder&;
-    auto ignoreFileOnce(std::filesystem::path file) -> NotifierBuilder&;
-    auto ignoreFile(std::filesystem::path file) -> NotifierBuilder&;
+    auto watchPathRecursively(fs::path path) -> NotifierBuilder&;
+    auto watchFile(fs::path file) -> NotifierBuilder&;
+    auto unwatchFile(fs::path file) -> NotifierBuilder&;
+    auto ignoreFileOnce(fs::path file) -> NotifierBuilder&;
+    auto ignoreFile(fs::path file) -> NotifierBuilder&;
     auto onEvent(Event event, EventObserver) -> NotifierBuilder&;
     auto onEvents(std::vector<Event> event, EventObserver) -> NotifierBuilder&;
     auto onUnexpectedEvent(EventObserver) -> NotifierBuilder&;

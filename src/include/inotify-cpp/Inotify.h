@@ -5,10 +5,9 @@
  * @copyright MIT
  **/
 #pragma once
+#include "config.h"
+
 #include <assert.h>
-#include <filesystem>
-#include <optional>
-#include <boost/bimap.hpp>
 #include <errno.h>
 #include <exception>
 #include <map>
@@ -23,6 +22,27 @@
 #include <chrono>
 #include <thread>
 #include <atomic>
+
+#ifdef INOTIFY_CPP_USE_CXX17
+#include <filesystem>
+#include <optional>
+#include <map>
+#include <functional>
+#include <string.h>
+
+template <typename X, typename Y>
+class bimap {
+  public:
+  std::map<X, Y> left;
+  std::map<Y, X> right;
+};
+namespace fs = std::filesystem;
+#else
+#include <boost/filesystem.hpp>
+#include <boost/optional.hpp>
+#include <boost/bimap.hpp>
+namespace fs = boost::filesystem;
+#endif
 
 #include <inotify-cpp/FileSystemEvent.h>
 
@@ -79,11 +99,11 @@ class Inotify {
  public:
   Inotify();
   ~Inotify();
-  void watchDirectoryRecursively(std::filesystem::path path);
-  void watchFile(std::filesystem::path file);
-  void unwatchFile(std::filesystem::path file);
-  void ignoreFileOnce(std::filesystem::path file);
-  void ignoreFile(std::filesystem::path file);
+  void watchDirectoryRecursively(fs::path path);
+  void watchFile(fs::path file);
+  void unwatchFile(fs::path file);
+  void ignoreFileOnce(fs::path file);
+  void ignoreFile(fs::path file);
   void setEventMask(uint32_t eventMask);
   uint32_t getEventMask();
   void setEventTimeout(std::chrono::milliseconds eventTimeout, std::function<void(FileSystemEvent)> onEventTimeout);
@@ -92,7 +112,7 @@ class Inotify {
   bool hasStopped();
 
 private:
-  std::filesystem::path wdToPath(int wd);
+  fs::path wdToPath(int wd);
   bool isIgnored(std::string file);
   bool isOnTimeout(const std::chrono::steady_clock::time_point &eventTime);
   void removeWatch(int wd);
@@ -110,7 +130,11 @@ private:
   std::vector<std::string> mIgnoredDirectories;
   std::vector<std::string> mOnceIgnoredDirectories;
   std::queue<FileSystemEvent> mEventQueue;
-  boost::bimap<int, std::filesystem::path> mDirectorieMap;
+#ifdef INOTIFY_CPP_USE_CXX17
+  bimap<int, fs::path> mDirectorieMap;
+#else
+  boost::bimap<int, fs::path> mDirectorieMap;
+#endif
   int mInotifyFd;
   std::atomic<bool> mStopped;
   int mEpollFd;
